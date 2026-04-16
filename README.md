@@ -16,6 +16,9 @@ Publish a JavaScript function, set a price, and agents pay per request via [x402
 | [non-us-proxy.js](non-us-proxy.js) | Get a non-US (Mexico) proxy from a managed pool | `WEBSHARE_API_KEY` | 2c |
 | [gmail-read.js](gmail-read.js) | List recent emails (requires Gmail OAuth connection) | None (OAuth) | 2c |
 | [gmail-reply.js](gmail-reply.js) | Send email replies (requires Gmail OAuth connection) | None (OAuth) | 2c |
+| [github-bounty.js](github-bounty.js) | Escrow arbiter — Claude agent reviews PRs against issues, signs on-chain release | `ANTHROPIC_API_KEY`, `GITHUB_TOKEN`, `MANAGED_AGENT_ID`, `MANAGED_ENV_ID` | 5c |
+
+> **On-chain:** The [EscrowBounty](contracts/EscrowBounty.sol) contract is deployed on Base at [`0x926470ef334b72c6eBDF540a434316e87a7Aa562`](https://basescan.org/address/0x926470ef334b72c6eBDF540a434316e87a7Aa562). Anyone can create bounties — the `github-bounty` flow's vault PKP acts as the arbiter.
 
 ## Getting Started
 
