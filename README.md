@@ -6,19 +6,23 @@ Publish a JavaScript function, set a price, and agents pay per request via [x402
 
 ## Examples
 
-| Flow | Description | Secrets | Price |
-|------|-------------|---------|-------|
-| [oracle.js](oracle.js) | Fetch a URL and sign the response with the flow's vault PKP | None | 5c |
-| [model-council.js](model-council.js) | Query 4 LLMs in parallel via OpenRouter, synthesize consensus | `OPENROUTER_API_KEY` | 90c |
-| [embeddings.js](embeddings.js) | Generate OpenAI text embeddings from text or PDF | `OPENAI_API_KEY` | 2c |
-| [pdf-extract.js](pdf-extract.js) | Extract text from a PDF using opendataloader-pdf | None | 2c |
-| [lob-postcard.js](lob-postcard.js) | Send a physical postcard via the Lob mail API | `LOB_SECRET_API_KEY` | $1.00 |
-| [non-us-proxy.js](non-us-proxy.js) | Get a non-US (Mexico) proxy from a managed pool | `WEBSHARE_API_KEY` | 2c |
-| [gmail-read.js](gmail-read.js) | List recent emails (requires Gmail OAuth connection) | None (OAuth) | 2c |
-| [gmail-reply.js](gmail-reply.js) | Send email replies (requires Gmail OAuth connection) | None (OAuth) | 2c |
-| [github-bounty.js](github-bounty.js) | Escrow arbiter — Claude agent reviews PRs against issues, signs on-chain release | `ANTHROPIC_API_KEY`, `GITHUB_TOKEN`, `MANAGED_AGENT_ID`, `MANAGED_ENV_ID` | 5c |
+Each example lives in its own folder with a README, the flow source, and any dependencies.
 
-> **On-chain:** The [EscrowBounty](contracts/EscrowBounty.sol) contract is deployed on Base at [`0x926470ef334b72c6eBDF540a434316e87a7Aa562`](https://basescan.org/address/0x926470ef334b72c6eBDF540a434316e87a7Aa562). Anyone can create bounties — the `github-bounty` flow's vault PKP acts as the arbiter.
+| Example | Description | Secrets | Price |
+|---------|-------------|---------|-------|
+| [oracle](oracle/) | Fetch a URL and sign the response with the flow's vault PKP | None | 5c |
+| [model-council](model-council/) | Query 4 LLMs in parallel via OpenRouter, synthesize consensus | `OPENROUTER_API_KEY` | 90c |
+| [embeddings](embeddings/) | Generate OpenAI text embeddings from text or PDF | `OPENAI_API_KEY` | 2c |
+| [pdf-extract](pdf-extract/) | Extract text from a PDF using opendataloader-pdf | None | 2c |
+| [lob-postcard](lob-postcard/) | Send a physical postcard via the Lob mail API | `LOB_SECRET_API_KEY` | $1.00 |
+| [non-us-proxy](non-us-proxy/) | Get a non-US (Mexico) proxy from a managed pool | `WEBSHARE_API_KEY` | 2c |
+| [gmail-read](gmail-read/) | List recent emails (requires Gmail OAuth connection) | None (OAuth) | 2c |
+| [gmail-reply](gmail-reply/) | Send email replies (requires Gmail OAuth connection) | None (OAuth) | 2c |
+| [identity-verify](identity-verify/) | Verify identity — name, address, phone, email against consumer databases | `MELISSA_API_KEY` | 10c |
+| [txn-checker](txn-checker/) | Two-layer EVM transaction verification with GoT LLM reasoning | `ALCHEMY_API_KEY`, `OPENROUTER_API_KEY` | 1c |
+| [github-bounty](github-bounty/) | Escrow arbiter — Claude agent reviews PRs against issues, signs on-chain release | `ANTHROPIC_API_KEY`, `GITHUB_TOKEN`, `MANAGED_AGENT_ID`, `MANAGED_ENV_ID` | 5c |
+
+> **On-chain:** The [EscrowBounty](github-bounty/EscrowBounty.sol) contract is deployed on Base at [`0x926470ef334b72c6eBDF540a434316e87a7Aa562`](https://basescan.org/address/0x926470ef334b72c6eBDF540a434316e87a7Aa562). Anyone can create bounties — the `github-bounty` flow's vault PKP acts as the arbiter.
 
 ## Getting Started
 
