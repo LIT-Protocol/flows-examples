@@ -1,13 +1,20 @@
-// x402 Passthrough — proxies x402-protected APIs, paying with the vault PKP wallet.
+// x402 Passthrough — credit card bridge to x402 APIs.
 //
+// x402 lets any API accept pay-per-request payments without signups or API keys.
+// But it runs on crypto (USDC), which is hard to get if you've never used it.
+// This flow bridges the gap: pay with Flows credits (loaded via credit card),
+// and the flow handles the crypto payment to any x402 API on your behalf.
+//
+// One signup on Flows, one credit balance, access to every x402 API.
+//
+// How it works:
 // 1. Caller sends { targetUrl, method?, body?, headers? }
-// 2. Flow fetches target URL -> gets 402 with PAYMENT-REQUIRED header
-// 3. Flow decodes requirements, signs EIP-3009 TransferWithAuthorization with vault PKP
-// 4. Flow re-sends request with PAYMENT-SIGNATURE header
-// 5. Returns upstream response + _actualCost
+// 2. Flow hits the target URL, gets a 402 payment challenge
+// 3. Flow signs an on-chain USDC payment using its vault wallet in a TEE
+// 4. Flow re-sends the request with the payment proof
+// 5. Returns the upstream response + what it actually cost
 //
-// Uses ethers v5 (available in Lit TEE environment).
-// No secrets required — pays with the vault PKP's USDC balance on Base.
+// No crypto wallet, no tokens, no blockchain knowledge needed.
 
 const targetUrl = params.targetUrl;
 if (!targetUrl) {
@@ -85,9 +92,10 @@ if (initialRes.status !== 402) {
   // Generate random nonce (bytes32)
   const nonce = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
-  // Valid from now, valid for 1 hour
-  const validAfter = 0;
-  const validBefore = Math.floor(Date.now() / 1000) + 3600;
+  // Valid from 10 minutes ago (clock skew tolerance), valid for maxTimeout or 1 hour
+  const now = Math.floor(Date.now() / 1000);
+  const validAfter = now - 600;
+  const validBefore = now + (requirements.maxTimeoutSeconds || 3600);
 
   // EIP-712 domain for USDC on Base
   const domain = {
@@ -121,13 +129,10 @@ if (initialRes.status !== 402) {
   // Sign EIP-712 typed data
   const signature = await wallet._signTypedData(domain, types, message);
 
-  // Build the payment payload
+  // Build the payment payload (must match x402 SDK v2 format)
   const paymentPayload = {
     x402Version: 2,
-    scheme,
-    network: requirements.network || 'base:8453',
     payload: {
-      signature,
       authorization: {
         from: wallet.address,
         to: payTo,
@@ -136,7 +141,10 @@ if (initialRes.status !== 402) {
         validBefore: validBefore.toString(),
         nonce,
       },
+      signature,
     },
+    resource: paymentRequired.resource || {},
+    accepted: requirements,
   };
 
   // Encode as base64
@@ -148,7 +156,6 @@ if (initialRes.status !== 402) {
     headers: {
       ...requestHeaders,
       'Payment-Signature': paymentSignature,
-      'X-Payment': paymentSignature,
     },
     ...(params.body ? { body: JSON.stringify(params.body) } : {}),
   });

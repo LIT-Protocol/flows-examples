@@ -1,23 +1,26 @@
-# x402 Passthrough Flow
+# x402 Passthrough — Credit Card Bridge to x402 APIs
 
-Proxies x402-protected APIs, paying with the platform's crypto wallet. Callers pay this flow, and the flow pays the upstream API — acting as a payment relay.
+Use any x402 API endpoint using a credit card and Flows platform credits. No crypto needed.
 
-## How it works
+## Why this exists
+
+[x402](https://x402.org) is a breakthrough in how APIs work. Instead of signing up for dozens of different API providers, managing API keys, and dealing with monthly plans, x402 lets you just pay per request with a single protocol. No signups. No rate limits. No monthly invoices. Any API that supports x402 works the same way.
+
+The problem? x402 runs on crypto (USDC), and getting crypto is hard if you've never done it. You need a wallet, you need to buy tokens, you need to understand gas and chains. That's a lot of friction just to call an API.
+
+## What this flow does
+
+This flow is a credit card bridge to the entire x402 ecosystem. You sign up once on Flows, load credits with a credit card, and you can use any x402-enabled API on the internet. The flow handles all the crypto behind the scenes — you never touch a wallet, buy tokens, or think about blockchain.
 
 ```
-Caller → [pays this flow via x402/credits] → Flow (TEE) → [pays upstream via x402] → Upstream API
+You (credit card) → Flows (credits) → x402 Passthrough (vault wallet) → Any x402 API
 ```
 
-1. Caller sends `{ targetUrl, method?, body?, headers? }`
-2. Flow makes initial request to target URL
-3. If upstream returns 402, flow decodes the PAYMENT-REQUIRED header
-4. Flow signs an EIP-3009 `TransferWithAuthorization` using the vault PKP wallet
-5. Flow re-sends with the `PAYMENT-SIGNATURE` header
-6. Returns upstream response + `_actualCost` (what the upstream actually charged)
+One signup. One credit balance. Access to every x402 API.
 
-## Dynamic pricing (upto scheme)
+## Dynamic pricing
 
-This flow uses the `upto` payment scheme — the caller authorizes up to a max amount, and only gets charged what the upstream actually costs. The `_actualCost` field in the response tells the platform what to settle.
+This flow uses "up to" pricing. You authorize a maximum per call, but you only pay what the upstream API actually charges. If an API costs $0.01 and your max is $0.10, you're billed $0.01.
 
 ## Parameters
 
@@ -28,21 +31,19 @@ This flow uses the `upto` payment scheme — the caller authorizes up to a max a
 | `body` | object | no | Request body (JSON) |
 | `headers` | object | no | Additional headers |
 
-## Response Fields
+## Response
 
 | Field | Description |
 |-------|-------------|
 | `data` | The upstream API response |
 | `upstreamStatus` | HTTP status from the upstream |
-| `_actualCost` | What was paid to the upstream (6-decimal raw units) |
-| `paidTo` | Address that received the upstream payment |
-| `paidFrom` | Vault PKP address that sent the payment |
-
-## Operational requirement
-
-The vault PKP wallet needs USDC on Base to pay upstream APIs. Fund the address shown after publishing.
+| `_actualCost` | What was actually charged (6-decimal raw units) |
+| `paidTo` | Address that received the payment |
+| `paidFrom` | Vault wallet address that made the payment |
 
 ## Example
+
+Search the web via Exa (an x402-enabled search API):
 
 ```bash
 curl -X POST https://flows.litprotocol.com/api/flows/x402-passthrough/invoke \
@@ -56,3 +57,14 @@ curl -X POST https://flows.litprotocol.com/api/flows/x402-passthrough/invoke \
     }
   }'
 ```
+
+Point `targetUrl` at any x402 endpoint — the flow reads the payment requirements and handles everything.
+
+## How it works under the hood
+
+1. Your request hits the target URL
+2. The upstream returns HTTP 402 with payment requirements
+3. The flow's vault wallet (running in a TEE) signs a USDC payment on Base
+4. The flow re-sends your request with the signed payment
+5. The upstream verifies payment and returns data
+6. You're only charged what was actually used
