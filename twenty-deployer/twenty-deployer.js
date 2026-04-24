@@ -30,9 +30,9 @@ export const manifest = {
   ],
 };
 
-// Twenty's official Railway template (see https://railway.com/template/LuQKZl).
+// Twenty's official Railway template (see https://railway.com/deploy/nAL3hA).
 // If Twenty's template moves, bump this constant; everything else is generic.
-const TWENTY_TEMPLATE_CODE = 'LuQKZl';
+const TWENTY_TEMPLATE_CODE = 'nAL3hA';
 const RAILWAY_API = 'https://backboard.railway.app/graphql/v2';
 
 async function railwayGraphQL(apiKey, query, variables) {

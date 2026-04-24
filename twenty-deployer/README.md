@@ -1,7 +1,8 @@
 # twenty-deployer
 
 Deploys [Twenty CRM](https://twenty.com) to **your** Railway account using
-**your** Railway API token stored in the Flows vault. Intentionally minimal —
+**your** Railway API token stored in the Flows vault. Uses Twenty's official
+Railway template ([railway.com/deploy/nAL3hA](https://railway.com/deploy/nAL3hA)). Intentionally minimal —
 this is the reference example for a **user-secret** flow (first flow in the
 repo to declare `manifest.userSecrets`).
 
